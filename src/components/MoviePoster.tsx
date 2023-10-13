@@ -53,7 +53,7 @@ function MoviePosterPopup({ movie }: { movie: Movie }) {
       <CardBody>
         <Image
           rounded="md"
-          src={`posters/${movie.poster}.jpg`}
+          src={`posters/${movie.poster_url}.jpg`}
           fallbackSrc={PLACEHOLDER}
           height="max"
           alt={movie.title}
@@ -82,7 +82,7 @@ function MoviePosterPopup({ movie }: { movie: Movie }) {
             bottom="1"
             right="0"
           >
-            {movie.rating}
+            {movie.content_rating}
           </Text>
         </Box>
         {/* list of session times for each day */}
@@ -147,7 +147,7 @@ export default function MoviePoster({
         <Box minHeight="sm">
           <Image
             rounded="md"
-            src={`posters/${movie.poster}.jpg`}
+            src={`posters/${movie.poster_url}.jpg`}
             fallbackSrc={PLACEHOLDER}
             // height="300"
             alt={movie.title}
@@ -208,7 +208,7 @@ export default function MoviePoster({
               bottom="2"
               right="0"
             >
-              {movie.rating}
+              {movie.content_rating}
             </Text>
           </Box>
         </Box>

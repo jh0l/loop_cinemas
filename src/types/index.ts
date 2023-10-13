@@ -10,7 +10,7 @@ export interface User {
   name: string;
   email: string;
   password: string;
-  created_at: string;
+  created_at: Date;
 }
 
 /**
@@ -185,8 +185,8 @@ export interface Movie {
   movie_id: string;
   title: string;
   year: string;
-  rating: string;
-  poster: string;
+  content_rating: string;
+  poster_url: string;
   plot: string;
   genres: string[];
   showTimes: {

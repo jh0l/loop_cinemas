@@ -14,7 +14,7 @@ export default function RootPage({ children }: { children?: React.ReactNode }) {
   return (
     <>
       <ScrollRestoration />
-      <Container minW="100%" bg="hsl(10, 20%, 98%)">
+      <Container minW="100%" bg="hsl(20, 10%, 86%)">
         <Container minH="calc(100vh)" maxWidth="1500px">
           <header>
             <Navbar />

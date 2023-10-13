@@ -31,7 +31,7 @@ export default function HomePage() {
         bgGradient="linear(to-l, #7928CA, #FF0080)"
         bgClip="text"
         fontSize="6xl"
-        fontWeight="black"
+        fontWeight="extrabold"
       >
         Welcome to Loop Cinemas
       </Heading>

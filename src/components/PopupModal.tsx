@@ -22,7 +22,7 @@ export function PopupModal() {
       <>
         <Modal blockScrollOnMount={false} isOpen={true} onClose={onClose}>
           <ModalOverlay />
-          <ModalContent>
+          <ModalContent margin={2}>
             {popup.title && <ModalHeader>{popup.title}</ModalHeader>}
             <ModalCloseButton zIndex="10" />
             <ModalBody>

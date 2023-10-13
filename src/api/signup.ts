@@ -90,7 +90,7 @@ export default async function signup({
     name: name.toString(),
     email: email.toString(),
     password: password.toString(),
-    created_at: new Date().toISOString(),
+    created_at: new Date(),
     user_id: Math.random().toString(),
   };
   const res = await Api.insertUser(newUser);
