@@ -36,10 +36,7 @@ export default async function login({
       400
     );
   }
-  const res = await Api.getUserWithPassword(
-    email.toString(),
-    password.toString()
-  );
+  const res = await Api.user_login(email.toString(), password.toString());
   if (res instanceof ApiFormError) {
     return response({ error: { form: res.json() } }, 400);
   }

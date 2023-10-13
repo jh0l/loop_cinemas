@@ -219,7 +219,7 @@ export default function ProfilePage() {
         <CardBody>
           <Divider mb="5" />
           <Text>
-            Joined: <b>{new Date(user.created_at).toDateString()}</b>
+            Joined: <b>{new Date(user.createdAt).toDateString()}</b>
           </Text>
         </CardBody>
       </Card>

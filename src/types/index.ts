@@ -10,7 +10,13 @@ export interface User {
   name: string;
   email: string;
   password: string;
-  created_at: Date;
+  createdAt: Date | string;
+}
+
+export interface InsertUser {
+  email: string;
+  name: string;
+  password: string;
 }
 
 /**
@@ -206,3 +212,7 @@ export interface Review {
   content: string;
   created_at: string;
 }
+
+export type ApiResponse =
+  | { type: "user"; user: User }
+  | { type: "error"; msg: string };

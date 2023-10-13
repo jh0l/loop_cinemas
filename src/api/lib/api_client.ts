@@ -6,14 +6,16 @@ import {
   EditProfileFormFieldName,
   Movie,
   Review,
+  InsertUser,
 } from "../../types";
 import { MOVIES } from "./fakeData";
+import fetchWithSoftError from "./fetchWithError";
 
 /**
  * A class to help with form validation
  * @template T The field names
  */
-export class ApiFormError<T extends string> {
+export class ApiFormError<T extends string | "message"> {
   field: T;
   message: string;
   constructor(field: T, message: string) {
@@ -35,7 +37,7 @@ const USERS_KEY = "users";
 const REVIEWS_KEY = "reviews";
 
 /**
- * a Fake Database that stores JSOn to and retrieves data from localStorage
+ * client that speaks with the express server
  */
 class ApiClient {
   users: User[];
@@ -43,8 +45,7 @@ class ApiClient {
   reviews: Review[];
 
   /**
-   * Creates a new instance of the fakeDb class
-   * loads data from localStorage
+   * Creates a new instance of the client class
    */
   constructor() {
     const users = localStorage.getItem(USERS_KEY);
@@ -68,17 +69,23 @@ class ApiClient {
    * @param user the user to signup
    * @returns a Promise that resolves to the user if successful or a SignupFormError if not
    */
-  async user_signup(user: User): Promise<User | SignupFormError> {
-    if (this.users.find((u) => u.email === user.email)) {
-      return new ApiFormError("email", "User already exists");
+  async user_signup(user: InsertUser): Promise<User | SignupFormError> {
+    const res = await fetchWithSoftError<User>("/api/user/signup", {
+      method: "POST",
+      body: JSON.stringify(user),
+    });
+    if (res instanceof ApiFormError) {
+      return res;
     }
-    this.users.push(user);
-    localStorage.setItem(USERS_KEY, JSON.stringify(this.users));
-    return user;
+    return res;
   }
 
   /**
-   * updates a user in the fake database
+   *
+   */
+
+  /**
+   * updates a user in the database
    * @param user_id user id of the user to update
    * @param user the fields of the user to update
    * @returns the updated user if successful or a EditProfileFormError if not
@@ -97,12 +104,12 @@ class ApiClient {
   }
 
   /**
-   * gets a user from the fake database
+   * gets a user from theke database
    * @param email the email of the user to get
    * @param password the password of the user to get
    * @returns the user if successful or a LoginFormFieldName if not
    */
-  async getUserWithPassword(
+  async user_login(
     email: string,
     password: string
   ): Promise<User | ApiFormError<LoginFormFieldName>> {
@@ -114,7 +121,7 @@ class ApiClient {
   }
 
   /**
-   * deletes a user from the fake database
+   * deletes a user from the database
    * @param user_id the user id of the user to delete
    * @returns the deleted user if successful or a EditProfileFormError if not
    */
@@ -132,7 +139,7 @@ class ApiClient {
   }
 
   /**
-   * gets all movies from the fake database
+   * gets all movies from the database
    * @returns a Promise that resolves to an array of movies
    */
   async getMovies(): Promise<Movie[]> {
@@ -152,7 +159,7 @@ class ApiClient {
   }
 
   /**
-   * adds a review to the fake database
+   * adds a review to the database
    * @param review the review to add
    * @returns a Promise that resolves to the added review
    */
@@ -170,7 +177,7 @@ class ApiClient {
   }
 
   /**
-   *  deletes a review from the fake database
+   *  deletes a review from the database
    * @param movie_id id of the movie the review to delete is for
    * @param user_id id of the user who created the review to delete
    * @returns the deleted review if successful or a ApiFormError if not
@@ -190,7 +197,7 @@ class ApiClient {
 }
 
 /**
- * a singleton instance of the fakeDb class
+ * instance of the client class
  */
 const instance = new ApiClient();
 export default instance;
