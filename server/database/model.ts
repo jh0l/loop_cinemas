@@ -27,28 +27,37 @@ const sequelize = new Sequelize(
   "mysql://s3585034_fwp_a2:c7nxhabGPSnSfluW@rmit.australiaeast.cloudapp.azure.com:3306/s3585034_fwp_a2"
 );
 
-class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
+export class user extends Model<
+  InferAttributes<user>,
+  InferCreationAttributes<user>
+> {
   declare user_id: CreationOptional<string>;
   declare name: string;
   declare email: string;
-  declare password: string;
-  declare created_at: CreationOptional<Date>;
+  declare password: string | (() => string);
 
-  declare getReviews: HasManyGetAssociationsMixin<Review>;
+  declare getReviews: HasManyGetAssociationsMixin<review>;
   declare countReviews: HasManyCountAssociationsMixin;
-  declare hasReview: HasManyHasAssociationMixin<Review, string>;
-  declare hasReviews: HasManyHasAssociationsMixin<Review, string>;
-  declare setReviews: HasManySetAssociationsMixin<Review, string>;
-  declare addReview: HasManyAddAssociationMixin<Review, string>;
-  declare addReviews: HasManyAddAssociationsMixin<Review, string>;
-  declare createReview: HasManyCreateAssociationMixin<Review>;
-  declare removeReview: HasManyRemoveAssociationMixin<Review, string>;
-  declare removeReviews: HasManyRemoveAssociationsMixin<Review, string>;
+  declare hasReview: HasManyHasAssociationMixin<review, string>;
+  declare hasReviews: HasManyHasAssociationsMixin<review, string>;
+  declare setReviews: HasManySetAssociationsMixin<review, string>;
+  declare addReview: HasManyAddAssociationMixin<review, string>;
+  declare addReviews: HasManyAddAssociationsMixin<review, string>;
+  declare createReview: HasManyCreateAssociationMixin<review>;
+  declare removeReview: HasManyRemoveAssociationMixin<review, string>;
+  declare removeReviews: HasManyRemoveAssociationsMixin<review, string>;
+  getPassword() {
+    if (typeof this.password === "function") {
+      return this.password();
+    } else {
+      return this.password;
+    }
+  }
 }
 
-class Movie extends Model<
-  InferAttributes<Movie>,
-  InferCreationAttributes<Movie>
+export class movie extends Model<
+  InferAttributes<movie>,
+  InferCreationAttributes<movie>
 > {
   declare movie_id: CreationOptional<string>;
   declare title: string;
@@ -58,36 +67,29 @@ class Movie extends Model<
   declare plot: string;
   declare genres: string[];
 
-  declare getReviews: HasManyGetAssociationsMixin<Review>;
+  declare getReviews: HasManyGetAssociationsMixin<review>;
   declare countReviews: HasManyCountAssociationsMixin;
-  declare hasReview: HasManyHasAssociationMixin<Review, string>;
-  declare hasReviews: HasManyHasAssociationsMixin<Review, string>;
-  declare setReviews: HasManySetAssociationsMixin<Review, string>;
-  declare addReview: HasManyAddAssociationMixin<Review, string>;
-  declare addReviews: HasManyAddAssociationsMixin<Review, string>;
-  declare createReview: HasManyCreateAssociationMixin<Review>;
-  declare removeReview: HasManyRemoveAssociationMixin<Review, string>;
-  declare removeReviews: HasManyRemoveAssociationsMixin<Review, string>;
+  declare hasReview: HasManyHasAssociationMixin<review, string>;
+  declare hasReviews: HasManyHasAssociationsMixin<review, string>;
+  declare setReviews: HasManySetAssociationsMixin<review, string>;
+  declare addReview: HasManyAddAssociationMixin<review, string>;
+  declare addReviews: HasManyAddAssociationsMixin<review, string>;
+  declare createReview: HasManyCreateAssociationMixin<review>;
+  declare removeReview: HasManyRemoveAssociationMixin<review, string>;
+  declare removeReviews: HasManyRemoveAssociationsMixin<review, string>;
 }
 
-class Review extends Model<
-  InferAttributes<Review>,
-  InferCreationAttributes<Review>
+export class review extends Model<
+  InferAttributes<review>,
+  InferCreationAttributes<review>
 > {
   declare user_id: ForeignKey<string>;
   declare movie_id: ForeignKey<string>;
   declare rating: number;
   declare content: string;
-  declare created_at: CreationOptional<Date>;
 }
 
-User.hasMany(Review, { sourceKey: "user_id", foreignKey: "user_id_f" });
-Movie.hasMany(Review, { foreignKey: "movie_id_f" });
-
-Review.belongsTo(User, { targetKey: "user_id_f" });
-Review.belongsTo(Movie, { foreignKey: "movie_id_f" });
-
-User.init(
+user.init(
   {
     user_id: {
       type: DataTypes.UUID,
@@ -106,16 +108,15 @@ User.init(
     password: {
       type: DataTypes.STRING(128),
       allowNull: false,
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      get() {
+        return () => this.getDataValue("password");
+      },
     },
   },
-  { sequelize }
+  { sequelize, tableName: "user", freezeTableName: true }
 );
 
-Movie.init(
+movie.init(
   {
     movie_id: {
       type: DataTypes.UUID,
@@ -147,15 +148,11 @@ Movie.init(
       allowNull: false,
     },
   },
-  { sequelize }
+  { sequelize, tableName: "movie", freezeTableName: true }
 );
 
-Review.init(
+review.init(
   {
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-    },
     rating: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -169,8 +166,11 @@ Review.init(
       allowNull: false,
     },
   },
-  { sequelize }
+  { sequelize, tableName: "review", freezeTableName: true }
 );
 
-const model = { User, Movie, Review, sequelize };
-export default model;
+user.hasMany(review, { sourceKey: "user_id", foreignKey: "user_id_f" });
+movie.hasMany(review, { sourceKey: "movie_id", foreignKey: "movie_id_f" });
+
+review.belongsTo(user, { foreignKey: "user_id_f", targetKey: "user_id" });
+review.belongsTo(movie, { foreignKey: "movie_id_f", targetKey: "movie_id" });

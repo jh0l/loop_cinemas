@@ -1,17 +1,20 @@
 {
+  "ts-node": {
+    "esm": true
+  },
   "include": ["./server/**/*"],
   "compilerOptions": {
     "esModuleInterop": true,
     "isolatedModules": true,
     "lib": ["esnext"],
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "NodeNext",
     "noImplicitAny": false,
-    "outDir": "dist/server",
+    "outDir": "./dist",
     "resolveJsonModule": true,
     "strict": false,
     "strictNullChecks": false,
-    "target": "esnext",
+    "target": "ES2016",
     "allowSyntheticDefaultImports": true
   }
 }

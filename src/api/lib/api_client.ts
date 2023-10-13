@@ -37,7 +37,7 @@ const REVIEWS_KEY = "reviews";
 /**
  * a Fake Database that stores JSOn to and retrieves data from localStorage
  */
-class fakeDb {
+class ApiClient {
   users: User[];
   movies: Movie[];
   reviews: Review[];
@@ -65,10 +65,10 @@ class fakeDb {
 
   /**
    *
-   * @param user the user to insert
+   * @param user the user to signup
    * @returns a Promise that resolves to the user if successful or a SignupFormError if not
    */
-  async insertUser(user: User): Promise<User | SignupFormError> {
+  async user_signup(user: User): Promise<User | SignupFormError> {
     if (this.users.find((u) => u.email === user.email)) {
       return new ApiFormError("email", "User already exists");
     }
@@ -192,5 +192,5 @@ class fakeDb {
 /**
  * a singleton instance of the fakeDb class
  */
-const instance = new fakeDb();
+const instance = new ApiClient();
 export default instance;

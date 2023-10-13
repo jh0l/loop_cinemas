@@ -6,7 +6,7 @@ import {
   FormReturnData,
   FormValidation,
 } from "../types";
-import Api, { ApiFormError } from "./lib/fakeDb";
+import Api, { ApiFormError } from "./lib/api_client";
 
 /**
  * the return type of the signup endpoint
@@ -93,7 +93,7 @@ export default async function signup({
     created_at: new Date(),
     user_id: Math.random().toString(),
   };
-  const res = await Api.insertUser(newUser);
+  const res = await Api.user_signup(newUser);
   if (res instanceof ApiFormError) {
     return response(
       {
