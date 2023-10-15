@@ -251,4 +251,5 @@ export type ApiResponse =
   | { type: "error"; msg: string }
   | { type: "success"; msg: string }
   | { type: "movies"; movies: Movie[] }
-  | { type: "reviews"; reviews: Review[] };
+  | { type: "reviews"; reviews: Review[] }
+  | { type: "sessions"; sessions: Session[] };

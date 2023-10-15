@@ -10,12 +10,14 @@ import {
   Text,
   Box,
 } from "@chakra-ui/react";
-import { Movie } from "../types";
+import { Movie, Session } from "../types";
 import { useAppContext } from "../context/app-context";
 import { Link as ChakraLink } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { MAX_RATING, MovieReviewData } from "../route_helpers/reviews";
 import Stars from "./Stars";
+import { useQuery } from "@tanstack/react-query";
+import api, { ApiError } from "../route_helpers/lib/api_client";
 
 /**
  * Truncate a string and add "..." if it is longer than max
@@ -37,6 +39,23 @@ function truncatDot(str: string, max = 128) {
  */
 function MoviePosterPopup({ movie }: { movie: Movie }) {
   // similar to MoviePoster, but with more information including session times
+  const query = useQuery({
+    queryKey: ["sessions", movie.movie_id],
+    queryFn: () => api.getSessions(movie.movie_id),
+  });
+  const session_days: { day: string; sessions: Session[] }[] = [];
+  if (query.data && !(query.data instanceof ApiError)) {
+    query.data.forEach((session) => {
+      const day = new Date(session.date_time).toLocaleDateString();
+      const dayIndex = session_days.findIndex((d) => d.day === day);
+      if (dayIndex >= 0) {
+        session_days[dayIndex].sessions.push(session);
+      } else {
+        session_days.push({ day, sessions: [session] });
+      }
+    });
+  }
+  console.log(session_days, query.data);
   return (
     <Card w="full" variant="unstyled">
       <Heading
@@ -89,16 +108,15 @@ function MoviePosterPopup({ movie }: { movie: Movie }) {
         <Divider my="4" />
         <Text fontWeight="bold">Session Times</Text>
         <Box display="flex" flexDir="column" flexWrap="wrap">
-          {/* TODO */}
-          {/* {movie.showTimes.map((sessions) => (
-            <Box key={sessions.day} py="1">
+          {session_days.map(({ day, sessions }) => (
+            <Box key={day} py="1">
               <Heading size="xs" p="2">
-                {new Date(Date.parse(sessions.day)).toDateString()}
+                {day}
               </Heading>
               <ButtonGroup flexWrap="wrap" gap="2" spacing="0">
-                {sessions.times.map((time) => (
+                {sessions.map((session) => (
                   <Button
-                    key={time}
+                    key={session.session_id}
                     size="sm"
                     onClick={() =>
                       alert(
@@ -109,12 +127,12 @@ function MoviePosterPopup({ movie }: { movie: Movie }) {
                       )
                     }
                   >
-                    {time}
+                    {new Date(session.date_time).toLocaleTimeString()}
                   </Button>
                 ))}
               </ButtonGroup>
             </Box>
-          ))} */}
+          ))}
         </Box>
       </CardBody>
     </Card>

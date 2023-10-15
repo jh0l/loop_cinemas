@@ -8,6 +8,7 @@ import {
   InsertUser,
   SignupFormFieldName,
   Success,
+  Session,
 } from "../../types";
 import fetchWithApiError from "./fetchWithApiError";
 
@@ -161,6 +162,21 @@ class ApiClient {
       method: "DELETE",
       body: JSON.stringify({ movie_id, user_id }),
     });
+  }
+
+  /**
+   * get the sessions for a movie from the database
+   * @param movie_id the id of the movie to get sessions for
+   */
+  async getSessions(
+    movie_id: string
+  ): Promise<Session[] | ApiError<"message">> {
+    return await fetchWithApiError<Session[]>(
+      `/api/sessions?movie_id=${movie_id}`,
+      {
+        method: "GET",
+      }
+    );
   }
 }
 

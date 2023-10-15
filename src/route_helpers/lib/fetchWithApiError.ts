@@ -30,6 +30,8 @@ export default async function fetchWithApiError<T>(
         return data.movies as T;
       case "reviews":
         return data.reviews as T;
+      case "sessions":
+        return data.sessions as T;
       case "success":
         return data as T;
       default:

@@ -3,7 +3,7 @@ import {
   RouterProvider,
   createBrowserRouter,
 } from "react-router-dom";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import SignupPage from "./pages/signup-page";
 import ErrorPage from "./pages/error-page";
@@ -102,7 +102,7 @@ export const routes: RouteObject[] = [
 ];
 
 const router = createBrowserRouter(routes);
-
+const queryClient = new QueryClient();
 /**
  * Combines the theme with the Chakra default theme.
  */
@@ -115,9 +115,11 @@ const themeExt = extendTheme(theme);
 export const App = () => {
   return (
     <AppContext>
-      <ChakraProvider theme={themeExt}>
-        <RouterProvider router={router} />
-      </ChakraProvider>
+      <QueryClientProvider client={queryClient}>
+        <ChakraProvider theme={themeExt}>
+          <RouterProvider router={router} />
+        </ChakraProvider>
+      </QueryClientProvider>
     </AppContext>
   );
 };

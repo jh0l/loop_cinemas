@@ -8,6 +8,7 @@ import { JwtManager, RequestAuthed, TryCatch } from "./shared.js";
 import { MOVIES } from "./fakeData.js";
 import MovieApi from "./movie_api.js";
 import ReviewApi from "./review_api.js";
+import SessionApi from "./session_api.js";
 
 //For env File
 dotenv.config();
@@ -191,6 +192,7 @@ app.get("/api/populate_fake_data", TryCatch, async (_, res) => {
 
 MovieApi(app);
 ReviewApi(app);
+SessionApi(app);
 
 app.listen(5000, () => {
   console.log("API Server listening on http://localhost:5000");

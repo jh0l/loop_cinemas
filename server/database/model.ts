@@ -82,6 +82,11 @@ export class movie extends Model<
   declare createReview: HasManyCreateAssociationMixin<review>;
   declare removeReview: HasManyRemoveAssociationMixin<review, string>;
   declare removeReviews: HasManyRemoveAssociationsMixin<review, string>;
+
+  declare getSessions: HasManyGetAssociationsMixin<session>;
+  declare countSessions: HasManyCountAssociationsMixin;
+  declare hasSession: HasManyHasAssociationMixin<session, string>;
+  declare hasSessions: HasManyHasAssociationsMixin<session, string>;
 }
 
 /**
@@ -108,7 +113,7 @@ export class session extends Model<
 > {
   declare session_id: CreationOptional<string>;
   declare movie_id: ForeignKey<string>;
-  declare date_time: string;
+  declare date_time: Date | string;
   declare createdAt: CreationOptional<Date | string>;
   declare updatedAt: CreationOptional<Date | string>;
 }
@@ -334,7 +339,7 @@ reservation.init(
  */
 user.hasMany(review, { sourceKey: "user_id", foreignKey: "user_id" });
 movie.hasMany(review, { sourceKey: "movie_id", foreignKey: "movie_id" });
-
+movie.hasMany(session, { sourceKey: "movie_id", foreignKey: "movie_id" });
 /**
  * review.belongsTo is called on the review model to define the one-to-one relationship between the review and user and movie models
  */
