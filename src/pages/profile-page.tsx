@@ -91,7 +91,12 @@ function EditProfileForm({ onClose }: { onClose: () => void }) {
           <FormControl isInvalid={"name" in errors}>
             <input value={data.user_id} type="hidden" name="user_id" />
             <FormLabel>Name</FormLabel>
-            <Input type="text" name="name" defaultValue={data.name} />
+            <Input
+              type="text"
+              name="name"
+              defaultValue={data.name}
+              data-cy="edit_name"
+            />
             <FormHelperText>
               {"Change what everyone will call you by."}
             </FormHelperText>
@@ -99,7 +104,12 @@ function EditProfileForm({ onClose }: { onClose: () => void }) {
           </FormControl>
           <FormControl isInvalid={"email" in errors}>
             <FormLabel>Email</FormLabel>
-            <Input type="email" name="email" defaultValue={data.email} />
+            <Input
+              type="email"
+              name="email"
+              defaultValue={data.email}
+              data-cy="edit_email"
+            />
             <FormHelperText>
               {"this will be required to log in."}
             </FormHelperText>
@@ -109,7 +119,7 @@ function EditProfileForm({ onClose }: { onClose: () => void }) {
             <Button width="200px" variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" width="200px">
+            <Button type="submit" width="200px" data-cy="edit_submit">
               Submit
             </Button>
           </FormControl>
@@ -169,7 +179,12 @@ function DeleteProfileForm({ onClose }: { onClose: () => void }) {
             <Button width="200px" variant="ghost" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" width="200px" colorScheme="red">
+            <Button
+              type="submit"
+              width="200px"
+              colorScheme="red"
+              data-cy="delete_submit"
+            >
               Delete
             </Button>
           </FormControl>
@@ -222,6 +237,7 @@ export default function ProfilePage() {
               variant="solid"
               colorScheme="gray"
               aria-label="Edit profile"
+              data-cy="edit"
               icon={<Pencil1Icon />}
             />
             <IconButton
@@ -229,6 +245,7 @@ export default function ProfilePage() {
               variant="outline"
               colorScheme="red"
               aria-label="See menu"
+              data-cy="delete"
               icon={<TrashIcon />}
             />
           </Flex>

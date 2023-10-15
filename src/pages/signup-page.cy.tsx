@@ -47,5 +47,7 @@ describe("signup page", () => {
     const confirmPasswordInput = cy.get("[data-cy=confirm_password]");
     confirmPasswordInput.type("$fsd8fs_a3F0a2%;d1");
     cy.contains("Submit").click();
+    cy.contains("Welcome to Loop Cinemas! You have successfully signed up.");
+    cy.contains("Close").click();
   });
 });

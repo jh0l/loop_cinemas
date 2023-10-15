@@ -40,5 +40,7 @@ describe("login page", () => {
     const passwordInput = cy.get("[data-cy=password]");
     passwordInput.type("$fsd8fs_a3F0a2%;d1");
     cy.contains("Submit").click();
+    cy.contains("Login successful");
+    cy.contains("Close").click();
   });
 });

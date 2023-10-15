@@ -17,7 +17,7 @@ const APP_CONTEXT = React.createContext<
 /**
  * The key for the authenticated user in localStorage.
  */
-const AUTHENTICATED_USER = "authenticated_user";
+export const AUTHENTICATED_USER = "authenticated_user";
 
 /**
  * The app context provider component. This component should be placed at the root of the app.
