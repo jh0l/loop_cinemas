@@ -19,7 +19,6 @@ const movie: Movie = {
   plot: "plot",
   content_rating: "content_rating",
   genres: ["genre1", "genre2"],
-  showTimes: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 };

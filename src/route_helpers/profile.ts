@@ -64,6 +64,9 @@ export default async function profile({
   return response({ success: { user: res } }, 200);
 }
 
+/**
+ * the profile loader for the profile page
+ */
 export type ProfileLoaderData = User | ApiError<"message"> | null;
 export function profileLoader(): Promise<ProfileLoaderData> {
   return Api.user_get();

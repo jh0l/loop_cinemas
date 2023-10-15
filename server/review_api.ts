@@ -4,6 +4,9 @@ import { review } from "./database/model.js";
 import { ApiResponse, Review } from "../src/types/index.js";
 
 export default function ReviewApi(app: express.Express) {
+  /**
+   * get all reviews, optionally filtered by user_id
+   */
   app.get("/api/reviews", TryCatch, async (req, res) => {
     // optional user_id query parameter
     const user_id = req.query.user_id as string | undefined;
@@ -18,6 +21,9 @@ export default function ReviewApi(app: express.Express) {
     res.json({ type: "reviews", reviews } as ApiResponse);
   });
 
+  /**
+   * add a review to the database, or update it if it already exists. Requires authentication
+   */
   app.post(
     "/api/reviews",
     TryCatch,
@@ -41,6 +47,9 @@ export default function ReviewApi(app: express.Express) {
     }
   );
 
+  /**
+   * delete a review from the database. Requires authentication, and the user_id must match the user_id of the review
+   */
   app.delete(
     "/api/reviews",
     TryCatch,
@@ -61,6 +70,13 @@ export default function ReviewApi(app: express.Express) {
         res
           .status(400)
           .json({ type: "error", msg: "Review does not exist" } as ApiResponse);
+        return;
+      }
+      // check user owns review
+      if (existing.user_id !== req.user?.user_id) {
+        res
+          .status(400)
+          .json({ type: "error", msg: "Invalid user" } as ApiResponse);
         return;
       }
       await review.destroy({

@@ -3,6 +3,9 @@ import { TryCatch } from "./shared.js";
 import { movie } from "./database/model.js";
 import { ApiResponse, Movie } from "../src/types/index.js";
 
+/**
+ * MovieApi for getting movies
+ */
 export default function MovieApi(app: express.Express) {
   app.get("/api/movies", TryCatch, async (_, res) => {
     const movies: Movie[] = (await movie.findAll()).map(

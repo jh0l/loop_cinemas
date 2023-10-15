@@ -13,8 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { useAppContext } from "../context/app-context";
 import Stars from "../components/Stars";
-import { AllReviewsLoaderData, MAX_RATING } from "../api/reviews";
-import { ApiError } from "../api/lib/api_client";
+import { AllReviewsLoaderData, MAX_RATING } from "../route_helpers/reviews";
+import { ApiError } from "../route_helpers/lib/api_client";
 
 /**
  * ReviewPage is the page that shows all the reviews for all the movies. It is a page that takes in no props.

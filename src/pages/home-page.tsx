@@ -8,8 +8,8 @@ import {
 } from "@chakra-ui/react";
 import { useLoaderData } from "react-router-dom";
 import MoviePoster from "../components/MoviePoster";
-import { AllReviewsLoaderData } from "../api/reviews";
-import { ApiError } from "../api/lib/api_client";
+import { AllReviewsLoaderData } from "../route_helpers/reviews";
+import { ApiError } from "../route_helpers/lib/api_client";
 
 /**
  * Home page, shows all movies and brief information about Loop Cinemas

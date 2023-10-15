@@ -14,6 +14,9 @@ export interface User {
   updatedAt: Date | string;
 }
 
+/**
+ * for creating a user
+ */
 export interface InsertUser {
   email: string;
   name: string;
@@ -201,10 +204,6 @@ export interface Movie {
   poster_url: string;
   plot: string;
   genres: string[];
-  showTimes: {
-    day: string;
-    times: string[];
-  }[];
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
@@ -221,6 +220,32 @@ export interface Review {
   updatedAt?: Date | string;
 }
 
+/**
+ * The Session type. It is used to represent a session in the application.
+ */
+export interface Session {
+  session_id: string;
+  movie_id: string;
+  date_time: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+/**
+ * The Reservation type. It is used to represent a reservation in the application.
+ */
+export interface Reservation {
+  reservation_id: string;
+  session_id: string;
+  user_id: string;
+  tickets: number;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+/**
+ * The ApiResponse type. It is used to represent the response from the api endpoints.
+ */
 export type ApiResponse =
   | { type: "user"; user: User }
   | { type: "error"; msg: string }

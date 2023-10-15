@@ -42,7 +42,7 @@
   },
   "scripts": {
     "build": "react-scripts build",
-    "testing-library/react sucks": "react-scripts test",
+    "testing-library/react is not very good :)": "react-scripts test",
     "eject": "react-scripts eject",
     "start": "react-scripts start",
     "dev": "nodemon --project=tsconfig.server.json -- server/index.ts ",

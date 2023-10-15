@@ -8,7 +8,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import instance from "../api/lib/api_client";
+import instance from "../route_helpers/lib/api_client";
 
 /**
  * Logout page, shows message and logs user out, with link to go home

@@ -23,10 +23,10 @@ import {
 import { useFetcher, useLoaderData, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Movie, Review, ReviewMovieFormError } from "../types";
-import { ReturnData } from "../api/reviews";
+import { ReturnData } from "../route_helpers/reviews";
 import Stars from "../components/Stars";
 import { TrashIcon } from "@radix-ui/react-icons";
-import { ApiError } from "../api/lib/api_client";
+import { ApiError } from "../route_helpers/lib/api_client";
 
 /**
  * MAX_RATING is the maximum rating a user can give a movie.
@@ -53,7 +53,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
   const [content, setContent] = useState(review?.content || "");
 
   /**
-   * useEffect that runs when fetcher.data changes. If fetcher.data is not equal to data, then we know that the fetcher has returned a response. We then parse the response and check if it was successful. If it was successful, we set the popup to a success popup and navigate to the reviews page. If it was not successful, we set the errors to the errors returned by the server.
+   * If review submission was successful, we set the popup to a success popup and navigate to the reviews page. If it was not successful, we set the errors to the errors returned by the server.
    */
   useEffect(() => {
     if (fetcher.data) {

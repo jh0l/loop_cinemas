@@ -15,14 +15,18 @@ install all the dependencies
 
 Runs the app in the development mode.
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.
-
 ### `npm run build`
 
 Builds the app for production to the `build` folder.
 
-### Express Server
+### `npm run dev`
 
-Based on: <https://medium.com/@anwesha_das/a-strongly-typed-create-react-app-with-an-express-api-server-44e2334ccc71>
+Runs the express server in development mode.
+
+### `npm run test`
+
+Runs the cypress unit tests.
+
+### `npm run test:open`
+
+Opens the cypress test runner.

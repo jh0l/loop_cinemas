@@ -18,7 +18,7 @@ import {
 import { Link, useFetcher, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/app-context";
 import { SignupFormError } from "../types";
-import { ReturnData } from "../api/signup";
+import { ReturnData } from "../route_helpers/signup";
 
 /**
  * SignupPage is the page where users can signup. It is a form that takes in a name, email, password, and confirm password. It will display an error message if the signup fails. It will display a success message if the signup succeeds.

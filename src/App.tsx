@@ -12,16 +12,16 @@ import HomePage from "./pages/home-page";
 import AppContext from "./context/app-context";
 import LogoutPage from "./pages/logout-page";
 import LoginPage from "./pages/login-page";
-import signup from "./api/signup";
-import login from "./api/login";
+import signup from "./route_helpers/signup";
+import login from "./route_helpers/login";
 import ProfilePage from "./pages/profile-page";
-import profile, { profileLoader } from "./api/profile";
+import profile, { profileLoader } from "./route_helpers/profile";
 import "@fontsource/poppins";
 import ReviewPage from "./pages/review-page";
 import reviews, {
   allReviewsLoader as allReviewsMoviesLoader,
   reviewsLoader,
-} from "./api/reviews";
+} from "./route_helpers/reviews";
 import ReviewMoviePage from "./pages/review-movie-page";
 
 /**

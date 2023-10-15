@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
-import { movie, review, user } from "./database/model.js";
+import { movie, reservation, review, user } from "./database/model.js";
 import { ApiResponse } from "../src/types/index.js";
 import { JwtManager, RequestAuthed, TryCatch } from "./shared.js";
 import { MOVIES } from "./fakeData.js";
@@ -11,19 +11,14 @@ import ReviewApi from "./review_api.js";
 
 //For env File
 dotenv.config();
-/**
- * TODO
- * [] user authentication
- *  [] signup
- *    [] hash password
- *    [] check unique
- *
- *  */
 
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
+/**
+ * manages password hashing and comparing
+ */
 const PasswordManager = {
   hashPassword: async (password: string) => {
     return bcrypt.hash(password, 10);
@@ -33,6 +28,13 @@ const PasswordManager = {
   },
 };
 
+/**
+ * sign up user and set cookies with JWT token and user_id payload
+ * @param name the name of the user
+ * @param email the email of the user
+ * @param password the password of the user
+ * @returns the user if successful or a error if not
+ */
 app.post("/api/user/signup", TryCatch, async (req, res) => {
   const { name, email, password } = req.body;
   // check if user exists
@@ -56,6 +58,12 @@ app.post("/api/user/signup", TryCatch, async (req, res) => {
   res.json({ type: "user", user: created } as ApiResponse);
 });
 
+/**
+ * sign in user and set cookies with JWT token and user_id payload
+ * @param email the email of the user
+ * @param password the password of the user
+ * @returns the user if successful or a error if not
+ */
 app.post("/api/user/signin", TryCatch, async (req, res) => {
   const { email, password } = req.body;
   const existing = await user.findOne({ where: { email } });
@@ -81,13 +89,16 @@ app.post("/api/user/signin", TryCatch, async (req, res) => {
 });
 
 /**
- * sign out user
+ * sign out user and remove cookies. Does not require authentication
  */
 app.get("/api/user/signout", TryCatch, async (req, res) => {
   JwtManager.clear(res);
   res.json({ type: "success", msg: "User signed out" } as ApiResponse);
 });
 
+/**
+ * gets the user's info from the database, requires authentication, returns user
+ */
 app.get(
   "/api/user",
   TryCatch,
@@ -100,6 +111,9 @@ app.get(
   }
 );
 
+/**
+ * edits the user's info in the database, requires authentication, returns user
+ */
 app.patch(
   "/api/user",
   TryCatch,
@@ -137,6 +151,9 @@ app.patch(
   }
 );
 
+/**
+ * deletes the user's info in the database, their reviews, their reservations, requires authentication, returns user
+ */
 app.delete(
   "/api/user",
   TryCatch,
@@ -153,11 +170,17 @@ app.delete(
     }
     // delete all reviews
     await review.destroy({ where: { user_id: userRes.user_id } });
+    // delete all reservations
+    await reservation.destroy({ where: { user_id: userRes.user_id } });
+    // delete user
     await userRes.destroy();
     res.json({ type: "user", user: userRes });
   }
 );
 
+/**
+ * creates fake data in the database for testing
+ */
 app.get("/api/populate_fake_data", TryCatch, async (_, res) => {
   MOVIES.forEach(async (m) => {
     const mMod = { ...m, genres: m.genres.join(",") };

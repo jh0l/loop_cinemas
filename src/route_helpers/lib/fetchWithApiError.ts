@@ -1,6 +1,9 @@
 import { ApiResponse } from "../../types";
 import { ApiError } from "./api_client";
 
+/**
+ * fetches a url and returns the response as JSON or an ApiError if there is an error. The ApiError will have a field of "message" and a message of the error message.
+ */
 export default async function fetchWithApiError<T>(
   url: RequestInfo | URL,
   options: RequestInit

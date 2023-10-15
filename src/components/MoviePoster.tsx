@@ -14,7 +14,7 @@ import { Movie } from "../types";
 import { useAppContext } from "../context/app-context";
 import { Link as ChakraLink } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { MAX_RATING, MovieReviewData } from "../api/reviews";
+import { MAX_RATING, MovieReviewData } from "../route_helpers/reviews";
 import Stars from "./Stars";
 
 /**
@@ -89,7 +89,8 @@ function MoviePosterPopup({ movie }: { movie: Movie }) {
         <Divider my="4" />
         <Text fontWeight="bold">Session Times</Text>
         <Box display="flex" flexDir="column" flexWrap="wrap">
-          {movie.showTimes.map((sessions) => (
+          {/* TODO */}
+          {/* {movie.showTimes.map((sessions) => (
             <Box key={sessions.day} py="1">
               <Heading size="xs" p="2">
                 {new Date(Date.parse(sessions.day)).toDateString()}
@@ -113,7 +114,7 @@ function MoviePosterPopup({ movie }: { movie: Movie }) {
                 ))}
               </ButtonGroup>
             </Box>
-          ))}
+          ))} */}
         </Box>
       </CardBody>
     </Card>

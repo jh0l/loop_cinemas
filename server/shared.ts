@@ -3,6 +3,9 @@ import jwt from "jsonwebtoken";
 
 import { ApiResponse } from "../src/types/index.js";
 
+/**
+ * TryCatch is a middleware that wraps the request in a try catch block and sends a 500 error if an error is thrown
+ */
 export const TryCatch = (
   _: express.Request,
   res: express.Response,
@@ -25,6 +28,10 @@ interface JWT {
 export type RequestAuthed = express.Request & { user?: JWT };
 
 const JWT_NAME = "loop_cinemas_jwt";
+
+/**
+ * JwtManager manages JWT tokens, including generating, verifying, and setting/clearing cookies
+ */
 export const JwtManager = {
   generateAccessToken: async ({ user_id }: JWT) => {
     return jwt.sign({ user_id }, process.env.JWT_SECRET as string, {

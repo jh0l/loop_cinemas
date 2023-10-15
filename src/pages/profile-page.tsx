@@ -24,9 +24,9 @@ import {
 import { useFetcher, useLoaderData } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { EditProfileFormError } from "../types";
-import { ProfileLoaderData, ReturnData } from "../api/profile";
+import { ProfileLoaderData, ReturnData } from "../route_helpers/profile";
 import { useRevalidator } from "react-router-dom";
-import { ApiError } from "../api/lib/api_client";
+import { ApiError } from "../route_helpers/lib/api_client";
 
 /**
  * EditProfileForm is the form that allows users to edit their profile. It is a form that takes in a onClose function for when the form is closed.
