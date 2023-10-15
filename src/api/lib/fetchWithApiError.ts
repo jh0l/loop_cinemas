@@ -1,7 +1,7 @@
 import { ApiResponse } from "../../types";
 import { ApiError } from "./api_client";
 
-export default async function fetchWithFormError<T>(
+export default async function fetchWithApiError<T>(
   url: RequestInfo | URL,
   options: RequestInit
 ): Promise<T | ApiError<"message">> {
@@ -21,12 +21,12 @@ export default async function fetchWithFormError<T>(
 
     const data = result as ApiResponse;
     switch (data.type) {
+      case "user":
+        return data.user as T;
       case "movies":
         return data.movies as T;
       case "reviews":
         return data.reviews as T;
-      case "user":
-        return data.user as T;
       case "success":
         return data as T;
       default:

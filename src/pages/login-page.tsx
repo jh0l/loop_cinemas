@@ -71,7 +71,7 @@ export default function LoginPage() {
         <FormControl isRequired isInvalid={"email" in errors}>
           <FormLabel>Email</FormLabel>
           <Input
-            type="email"
+            type="text"
             name="email"
             placeholder="email@example.com"
             data-cy="email"

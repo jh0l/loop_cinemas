@@ -12,10 +12,16 @@ const user: User = {
 };
 
 describe("profile page", () => {
+  /**
+   * Purpose of this test: to make sure that the profile page renders without crashing
+   */
   it("should render without crashing", () => {
     cy.mount(renderWithRouter("/profile"));
   });
 
+  /**
+   * Purpose of this test: to make sure that the profile page displays user information
+   */
   it("should display user information", () => {
     cy.intercept("/api/user", {
       type: "user",
@@ -31,6 +37,9 @@ describe("profile page", () => {
     cy.contains(user.email);
   });
 
+  /**
+   * Purpose of this test: to make sure that the profile page displays user information
+   */
   it("should edit user information", () => {
     cy.intercept("GET", "/api/user", {
       type: "user",
@@ -52,8 +61,10 @@ describe("profile page", () => {
     cy.get('[data-cy="edit_submit"]').click();
     cy.wait("@patchUser").its("response.body.user").should("exist");
   });
-  // edit name
 
+  /**
+   * Purpose of this test: to make sure that the profile page displays user information
+   */
   it("should delete user", () => {
     cy.intercept("GET", "/api/user", {
       type: "user",
@@ -70,7 +81,12 @@ describe("profile page", () => {
     cy.mount(renderWithRouter("/"));
     cy.get('[data-cy="Profile"]').click();
     cy.get('[data-cy="delete"]').click();
+    cy.intercept("GET", "/api/user", {
+      type: "user",
+      user: null,
+    }).as("getUser");
     cy.get('[data-cy="delete_submit"]').click();
     cy.wait("@deleteUser").its("response.body.user").should("exist");
+    cy.contains("You are not logged in.");
   });
 });

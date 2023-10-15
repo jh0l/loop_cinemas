@@ -1,5 +1,5 @@
 import { ActionFunctionArgs } from "react-router-dom";
-import Api, { ApiError } from "../api/lib/api_client";
+import Api, { ApiError } from "./lib/api_client";
 import {
   FormReturnData,
   FormValidation,
@@ -14,7 +14,7 @@ import { ReviewMovieLoaderData } from "../pages/review-movie-page";
  * the return type of the reviews endpoint
  */
 export type ReturnData = FormReturnData<
-  { review: Review; type: "POST" | "DELETE" },
+  { msg: string; type: "success" },
   ReviewMovieFormError
 >;
 
@@ -28,32 +28,20 @@ export const timeoutPromise = (delay: number, value: any = undefined) =>
   new Promise((resolve) => setTimeout(resolve, delay, value));
 
 /**
- * creates a response object
- * @param data the return type from above
- * @param status the status code of the http response
- * @returns a Response object
- */
-const response = (data: ReturnData, status: number): Response =>
-  new Response(JSON.stringify(data), { status });
-
-/**
  * the reviews endpoint for creating, editing, and deleting reviews
  * @param args the ActionFunctionArgs supplied by react router dom
  * @returns a Response object
  */
 export default async function reviews(
   args: ActionFunctionArgs
-): Promise<Response> {
+): Promise<ReturnData> {
   if (args.request.method === "POST") return await POST(args);
   if (args.request.method === "DELETE") return await DELETE(args);
-  return response(
-    {
-      error: {
-        message: `Method ${args.request.method} not allowed`,
-      },
+  return {
+    error: {
+      message: `Method ${args.request.method} not allowed`,
     },
-    405
-  );
+  };
 }
 
 /**
@@ -61,40 +49,39 @@ export default async function reviews(
  * @param args the ActionFunctionArgs supplied by react router dom
  * @returns a Response object
  */
-async function DELETE(args: ActionFunctionArgs) {
+async function DELETE(args: ActionFunctionArgs): Promise<ReturnData> {
   const data = await args.request.formData();
   const movie_id = args.params.movieId;
   const user_id = data.get("user_id");
   if (!movie_id || !user_id) {
-    return response(
-      {
-        error: {
-          message: "Missing required fields",
-        },
+    return {
+      error: {
+        message: "Missing required fields",
       },
-      400
-    );
+    };
   }
   const review = await Api.deleteReview(movie_id, user_id.toString());
-  if ("message" in review) {
-    return response(
-      {
-        error: {
-          message: review.message,
-        },
+  if (review instanceof ApiError) {
+    return {
+      error: {
+        message: review.message,
       },
-      404
-    );
+    };
   }
-  return response({ success: { review, type: "DELETE" } }, 200);
+  return { success: { ...review } };
 }
+
+/**
+ * MAX_CONTENT is the maximum number of characters a user can write in a review.
+ */
+const MAX_CONTENT = 600;
 
 /**
  * the POST handler for the reviews endpoint
  * @param args the ActionFunctionArgs supplied by react router dom
  * @returns a Response object
  */
-async function POST(args: ActionFunctionArgs) {
+async function POST(args: ActionFunctionArgs): Promise<ReturnData> {
   const data = await args.request.formData();
   const validation = new FormValidation<PostReviewMovieFormFieldName>();
   // get movie_id from url
@@ -121,14 +108,24 @@ async function POST(args: ActionFunctionArgs) {
 
   if (!content || content.toString().trim() === "") {
     setInvalid("content").err("Content cannot be empty");
-  } else if (content.toString().length > 250) {
-    setInvalid("content").err("Content cannot be longer than 250 characters");
+  } else if (content.toString().length > MAX_CONTENT) {
+    setInvalid("content").err(
+      `Content cannot be longer than ${MAX_CONTENT} characters`
+    );
+  }
+
+  if (validation.length() > 0) {
+    return {
+      error: {
+        form: validation.json(),
+      },
+    };
   }
 
   // PREVENT FAKE REVIEWS
   const reviews = await Api.getReviews(user_id);
   if (reviews instanceof ApiError) {
-    return response({ error: { message: reviews.message } }, 400);
+    return { error: { message: reviews.message } };
   }
   // if last review was less than 3 hours ago, return an error
   if (reviews.length > 0) {
@@ -150,25 +147,19 @@ async function POST(args: ActionFunctionArgs) {
   }
 
   if (validation.length() > 0) {
-    return response(
-      {
-        error: {
-          form: validation.json(),
-        },
+    return {
+      error: {
+        form: validation.json(),
       },
-      400
-    );
+    };
   }
 
   if (!movie_id || !user_id || !rating || !content) {
-    return response(
-      {
-        error: {
-          message: "Missing required fields",
-        },
+    return {
+      error: {
+        message: "Missing required fields",
       },
-      400
-    );
+    };
   }
   const ratingN = Number(rating.toString()) / 10;
   const review: Review = {
@@ -178,9 +169,17 @@ async function POST(args: ActionFunctionArgs) {
     content: content.toString(),
   };
 
-  await Api.addReview(review);
+  const res = await Api.addReview(review);
 
-  return response({ success: { review, type: "POST" } }, 200);
+  if (res instanceof ApiError) {
+    return {
+      error: {
+        message: res.message,
+      },
+    };
+  }
+
+  return { success: { ...res } };
 }
 
 /**

@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { useAppContext } from "../context/app-context";
 import Stars from "../components/Stars";
-import { AllReviewsLoaderData, MAX_RATING } from "../components/reviews";
+import { AllReviewsLoaderData, MAX_RATING } from "../api/reviews";
 import { ApiError } from "../api/lib/api_client";
 
 /**

@@ -3,10 +3,17 @@ import renderWithRouter from "../test-utils";
 import { User } from "../types";
 
 describe("signup page", () => {
+  /**
+   * Purpose of this test: to make sure that the signup page renders without crashing
+   */
   it("should render without crashing", () => {
     cy.mount(renderWithRouter("/signup"));
     cy.contains("Submit").click();
   });
+
+  /**
+   * Purpose of this test: to make sure that the signup page validates user input
+   */
   it("should validate user input", () => {
     cy.mount(renderWithRouter("/signup"));
     const nameInput = cy.get("[data-cy=name]");
@@ -23,19 +30,21 @@ describe("signup page", () => {
       "Password must be at least 14 characters long"
     );
   });
+
+  /**
+   * Purpose of this test: to make sure that the signup page submits valid user input
+   */
   it("should submit valid user input", () => {
-    cy.intercept("POST", "/api/user/signup", (req) => {
-      req.reply({
-        type: "user",
-        user: {
-          name: "name",
-          email: "a@b.c",
-          password: "$fsd8fs_a3F0a2%;d1",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          user_id: "abc123",
-        } as User,
-      });
+    cy.intercept("POST", "/api/user/signup", {
+      type: "user",
+      user: {
+        name: "name",
+        email: "a@b.c",
+        password: "$fsd8fs_a3F0a2%;d1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        user_id: "abc123",
+      } as User,
     });
     cy.mount(renderWithRouter("/signup"));
     const nameInput = cy.get("[data-cy=name]");

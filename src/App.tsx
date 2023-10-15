@@ -1,4 +1,8 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  RouteObject,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import SignupPage from "./pages/signup-page";
@@ -17,7 +21,7 @@ import ReviewPage from "./pages/review-page";
 import reviews, {
   allReviewsLoader as allReviewsMoviesLoader,
   reviewsLoader,
-} from "./components/reviews";
+} from "./api/reviews";
 import ReviewMoviePage from "./pages/review-movie-page";
 
 /**
@@ -40,7 +44,7 @@ const theme = {
 /**
  * Router for the app. Some routes have loaders for data loading. Some routes have actions for form submissions.
  */
-export const routes = [
+export const routes: RouteObject[] = [
   {
     path: "",
     element: <RootPage />,

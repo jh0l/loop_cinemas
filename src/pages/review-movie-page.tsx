@@ -23,7 +23,7 @@ import {
 import { useFetcher, useLoaderData, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Movie, Review, ReviewMovieFormError } from "../types";
-import { ReturnData } from "../components/reviews";
+import { ReturnData } from "../api/reviews";
 import Stars from "../components/Stars";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { ApiError } from "../api/lib/api_client";
@@ -36,7 +36,7 @@ const MAX_RATING = 5;
 /**
  * MAX_CONTENT is the maximum number of characters a user can write in a review.
  */
-const MAX_CONTENT = 250;
+const MAX_CONTENT = 600;
 
 /**
  * ReviewMovieForm is the form that allows users to review a movie. It is a form that takes in a review. If the review is undefined, then the form will be for creating a new review. Otherwise, the form will be for editing the review.
@@ -46,9 +46,8 @@ const MAX_CONTENT = 250;
 function ReviewMovieForm({ review }: { review: Review | undefined }) {
   const navigate = useNavigate();
   // get movieId from url
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<ReturnData>();
   const [[user], [, setPopup]] = useAppContext();
-  const [data, setData] = useState();
   const [errors, setErrors] = useState<ReviewMovieFormError>({});
   const [rating, setRating] = useState(review?.rating || 5);
   const [content, setContent] = useState(review?.content || "");
@@ -57,14 +56,14 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
    * useEffect that runs when fetcher.data changes. If fetcher.data is not equal to data, then we know that the fetcher has returned a response. We then parse the response and check if it was successful. If it was successful, we set the popup to a success popup and navigate to the reviews page. If it was not successful, we set the errors to the errors returned by the server.
    */
   useEffect(() => {
-    if (fetcher.data !== data) {
-      setData(fetcher.data);
-      const res = JSON.parse(fetcher.data) as ReturnData;
-      console.log(res, user);
+    if (fetcher.data) {
+      const res = fetcher.data;
+      fetcher.data = undefined;
       if ("success" in res) {
         setErrors({});
+        if (!fetcher.formMethod) return;
         // if submit type was POST then we are creating a new review
-        if (res.success.type === "POST") {
+        if (fetcher.formMethod?.toUpperCase() === "POST") {
           setPopup({
             title: "Review Submitted",
             body: "Review submitted successfully.",
@@ -84,7 +83,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
         setErrors({ message: res.error.message });
       }
     }
-  }, [fetcher, data, setPopup, navigate, user]);
+  }, [fetcher, setPopup, navigate, user]);
   const handleRating = (val: number) => {
     setRating(val);
   };
@@ -103,7 +102,9 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
       >
         {"message" in errors && (
           <FormControl isInvalid={"message" in errors}>
-            <FormErrorMessage>{errors.message}</FormErrorMessage>
+            <FormErrorMessage data-cy="message_error">
+              {errors.message}
+            </FormErrorMessage>
           </FormControl>
         )}
         <input value={user.user_id} type="hidden" name="user_id" />
@@ -121,6 +122,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
               error={"rating" in errors}
             />
             <Slider
+              data-cy="rating_slider"
               opacity={0}
               mt="3"
               transform="scale(0.9, 2)"
@@ -144,6 +146,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
         </FormControl>
         <FormControl isInvalid={"content" in errors}>
           <Textarea
+            data-cy="content"
             name="content"
             placeholder="Write your review here."
             size="sm"
@@ -164,7 +167,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
         </FormControl>
         <FormControl isInvalid={"human" in errors}>
           <FormLabel>Verify you're human</FormLabel>
-          <Input name="human" placeholder="Type here." />
+          <Input name="human" placeholder="Type here." data-cy="human" />
           <FormHelperText>
             {
               "To make sure you're human please type 'I am not a robot' in this field."
@@ -173,7 +176,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
           <FormErrorMessage>{errors.human}</FormErrorMessage>
         </FormControl>
         <FormControl display="flex" gap="10" justifyContent="end">
-          <Button type="submit" width="180px">
+          <Button type="submit" width="180px" data-cy="submit">
             Submit
           </Button>
         </FormControl>
@@ -199,6 +202,7 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
               width="180px"
               color="red"
               variant="ghost"
+              data-cy="delete"
             >
               Delete
               <TrashIcon />

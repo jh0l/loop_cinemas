@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { useLoaderData } from "react-router-dom";
 import MoviePoster from "../components/MoviePoster";
-import { AllReviewsLoaderData } from "../components/reviews";
+import { AllReviewsLoaderData } from "../api/reviews";
 import { ApiError } from "../api/lib/api_client";
 
 /**

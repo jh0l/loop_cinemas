@@ -20,6 +20,11 @@ export interface InsertUser {
   password: string;
 }
 
+export type Success = {
+  msg: string;
+  type: "success";
+};
+
 /**
  * A form error object. The keys are the field names and the values are the error messages
  */
