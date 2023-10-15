@@ -100,7 +100,9 @@ export default function Navbar() {
           <TabList>
             {navLinks.map((link) => (
               <NavLink to={link.path} key={link.name}>
-                <Tab width="75px">{link.name}</Tab>
+                <Tab width="75px" data-cy={link.name}>
+                  {link.name}
+                </Tab>
               </NavLink>
             ))}
           </TabList>

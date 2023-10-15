@@ -4,6 +4,11 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import { movie, review, user } from "./database/model.js";
+import { ApiResponse } from "../src/types/index.js";
+import { TryCatch } from "./shared.js";
+import { MOVIES } from "./fakeData.js";
+import MovieApi from "./movie_api.js";
+import ReviewApi from "./review_api.js";
 
 //For env File
 dotenv.config();
@@ -43,7 +48,7 @@ const JwtManager = {
       if (!user || typeof user === "string") {
         return res
           .status(403)
-          .json({ type: "error", msg: "Error verifying JWT" });
+          .json({ type: "error", msg: "Error verifying JWT" } as ApiResponse);
       }
       if ("user_id" in user === false) {
         return res
@@ -55,9 +60,10 @@ const JwtManager = {
       next();
     } catch (e) {
       console.log(e);
-      return res
-        .status(403)
-        .json({ type: "error", msg: "JWT could not be verified" });
+      return res.status(403).json({
+        type: "error",
+        msg: "JWT could not be verified",
+      } as ApiResponse);
     }
   },
   async set(res: express.Response, data: JWT) {
@@ -77,21 +83,14 @@ const PasswordManager = {
   },
 };
 
-const TryCatch = (_: express.Request, res: express.Response, next: any) => {
-  try {
-    next();
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ type: "error", msg: "Internal server error" });
-  }
-};
-
 app.post("/api/user/signup", TryCatch, async (req, res) => {
   const { name, email, password } = req.body;
   // check if user exists
   const existing = await user.findOne({ where: { email } });
   if (existing) {
-    res.status(400).json({ type: "error", msg: "User already exists" });
+    res
+      .status(400)
+      .json({ type: "error", msg: "User already exists" } as ApiResponse);
     return;
   }
 
@@ -104,14 +103,16 @@ app.post("/api/user/signup", TryCatch, async (req, res) => {
 
   await JwtManager.set(res, { user_id: created.user_id });
 
-  res.json({ type: "user", user: created });
+  res.json({ type: "user", user: created } as ApiResponse);
 });
 
 app.post("/api/user/signin", TryCatch, async (req, res) => {
   const { email, password } = req.body;
   const existing = await user.findOne({ where: { email } });
   if (!existing) {
-    res.status(400).json({ type: "error", msg: "User does not exist" });
+    res
+      .status(400)
+      .json({ type: "error", msg: "User does not exist" } as ApiResponse);
     return;
   }
   const passwordMatch = await PasswordManager.comparePassword(
@@ -119,12 +120,22 @@ app.post("/api/user/signin", TryCatch, async (req, res) => {
     existing.getPassword()
   );
   if (!passwordMatch) {
-    res.status(400).json({ type: "error", msg: "Password is incorrect" });
+    res
+      .status(400)
+      .json({ type: "error", msg: "Password is incorrect" } as ApiResponse);
     return;
   }
   await JwtManager.set(res, { user_id: existing.user_id });
 
-  res.json({ type: "user", user: existing });
+  res.json({ type: "user", user: existing } as ApiResponse);
+});
+
+/**
+ * sign out user
+ */
+app.get("/api/user/signout", TryCatch, async (req, res) => {
+  res.clearCookie(JWT_NAME);
+  res.json({ type: "success", msg: "User signed out" } as ApiResponse);
 });
 
 app.get(
@@ -138,6 +149,75 @@ app.get(
     res.json({ type: "user", user: userRes });
   }
 );
+
+app.patch(
+  "/api/user",
+  TryCatch,
+  JwtManager.authenticateToken,
+  async (req: RequestAuthed, res) => {
+    const { name, email, password } = req.body;
+    const userRes = await user.findOne({
+      where: { user_id: req.user?.user_id },
+    });
+    if (!userRes) {
+      res
+        .status(400)
+        .json({ type: "error", msg: "User does not exist" } as ApiResponse);
+      return;
+    }
+    if (name) {
+      userRes.name = name;
+    }
+    if (email) {
+      // check email is not used by another user
+      const existing = await user.findOne({ where: { email } });
+      if (existing && existing.user_id !== userRes.user_id) {
+        res
+          .status(400)
+          .json({ type: "error", msg: "Email already in use" } as ApiResponse);
+        return;
+      }
+      userRes.email = email;
+    }
+    if (password) {
+      userRes.password = await PasswordManager.hashPassword(password);
+    }
+    await userRes.save();
+    res.json({ type: "user", user: userRes });
+  }
+);
+
+app.delete(
+  "/api/user",
+  TryCatch,
+  JwtManager.authenticateToken,
+  async (req: RequestAuthed, res) => {
+    const userRes = await user.findOne({
+      where: { user_id: req.user?.user_id },
+    });
+    if (!userRes) {
+      res
+        .status(400)
+        .json({ type: "error", msg: "User does not exist" } as ApiResponse);
+      return;
+    }
+    // delete all reviews
+    await review.destroy({ where: { user_id: userRes.user_id } });
+    await userRes.destroy();
+    res.json({ type: "user", user: userRes });
+  }
+);
+
+app.get("/api/populate_fake_data", TryCatch, async (_, res) => {
+  MOVIES.forEach(async (m) => {
+    const mMod = { ...m, genres: m.genres.join(",") };
+    await movie.create(mMod);
+  });
+  res.json({ type: "success", msg: "Fake data populated" } as ApiResponse);
+});
+
+MovieApi(app);
+ReviewApi(app);
 
 app.listen(5000, () => {
   console.log("API Server listening on http://localhost:5000");

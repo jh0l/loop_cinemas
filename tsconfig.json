@@ -1,5 +1,5 @@
 {
-  "include": ["src"],
+  "include": ["src", "cypress.d.ts"],
   "compilerOptions": {
     "esModuleInterop": true,
     "isolatedModules": true,

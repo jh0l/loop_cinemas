@@ -35,6 +35,8 @@ export class user extends Model<
   declare name: string;
   declare email: string;
   declare password: string | (() => string);
+  declare createdAt: CreationOptional<Date | string>;
+  declare updatedAt: CreationOptional<Date | string>;
 
   declare getReviews: HasManyGetAssociationsMixin<review>;
   declare countReviews: HasManyCountAssociationsMixin;
@@ -65,7 +67,9 @@ export class movie extends Model<
   declare content_rating: string;
   declare poster_url: string;
   declare plot: string;
-  declare genres: string[];
+  declare genres: string;
+  declare createdAt: CreationOptional<Date | string>;
+  declare updatedAt: CreationOptional<Date | string>;
 
   declare getReviews: HasManyGetAssociationsMixin<review>;
   declare countReviews: HasManyCountAssociationsMixin;
@@ -87,6 +91,8 @@ export class review extends Model<
   declare movie_id: ForeignKey<string>;
   declare rating: number;
   declare content: string;
+  declare createdAt: CreationOptional<Date | string>;
+  declare updatedAt: CreationOptional<Date | string>;
 }
 
 user.init(
@@ -111,6 +117,16 @@ user.init(
       get() {
         return () => this.getDataValue("password");
       },
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   { sequelize, tableName: "user", freezeTableName: true }
@@ -144,8 +160,18 @@ movie.init(
       allowNull: false,
     },
     genres: {
-      type: DataTypes.ARRAY(DataTypes.STRING(128)),
+      type: DataTypes.STRING(128),
       allowNull: false,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   },
   { sequelize, tableName: "movie", freezeTableName: true }
@@ -153,6 +179,16 @@ movie.init(
 
 review.init(
   {
+    user_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      primaryKey: true,
+    },
+    movie_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      primaryKey: true,
+    },
     rating: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -165,12 +201,22 @@ review.init(
       type: DataTypes.STRING(600),
       allowNull: false,
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
   },
   { sequelize, tableName: "review", freezeTableName: true }
 );
 
-user.hasMany(review, { sourceKey: "user_id", foreignKey: "user_id_f" });
-movie.hasMany(review, { sourceKey: "movie_id", foreignKey: "movie_id_f" });
+user.hasMany(review, { sourceKey: "user_id", foreignKey: "user_id" });
+movie.hasMany(review, { sourceKey: "movie_id", foreignKey: "movie_id" });
 
-review.belongsTo(user, { foreignKey: "user_id_f", targetKey: "user_id" });
-review.belongsTo(movie, { foreignKey: "movie_id_f", targetKey: "movie_id" });
+review.belongsTo(user, { foreignKey: "user_id", targetKey: "user_id" });
+review.belongsTo(movie, { foreignKey: "movie_id", targetKey: "movie_id" });

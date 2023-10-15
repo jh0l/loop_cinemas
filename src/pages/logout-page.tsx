@@ -8,6 +8,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import instance from "../api/lib/api_client";
 
 /**
  * Logout page, shows message and logs user out, with link to go home
@@ -16,6 +17,7 @@ import { Link } from "react-router-dom";
 export default function LogoutPage() {
   const [[, setUser]] = useAppContext();
   useEffect(() => {
+    instance.user_logout();
     setUser(false);
   }, [setUser]);
   return (

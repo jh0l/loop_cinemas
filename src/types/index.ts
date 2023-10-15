@@ -11,6 +11,7 @@ export interface User {
   email: string;
   password: string;
   createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface InsertUser {
@@ -199,20 +200,25 @@ export interface Movie {
     day: string;
     times: string[];
   }[];
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 /**
  * The Review type. It is used to represent a review in the application.
  */
 export interface Review {
-  review_id: string;
   movie_id: string;
   user_id: string;
   rating: number;
   content: string;
-  created_at: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export type ApiResponse =
   | { type: "user"; user: User }
-  | { type: "error"; msg: string };
+  | { type: "error"; msg: string }
+  | { type: "success"; msg: string }
+  | { type: "movies"; movies: Movie[] }
+  | { type: "reviews"; reviews: Review[] };

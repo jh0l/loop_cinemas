@@ -21,12 +21,13 @@ import { ReturnData } from "../api/login";
 export default function LoginPage() {
   const navigate = useNavigate();
   const [, [, setPopup]] = useAppContext();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<ReturnData>();
   const [[, setUser]] = useAppContext();
   const [errors, setErrors] = useState<LoginFormError>({});
   useEffect(() => {
     if (fetcher.data) {
-      const res = JSON.parse(fetcher.data) as ReturnData;
+      console.log(fetcher.data);
+      const res = fetcher.data;
       if ("success" in res) {
         setUser(res.success.user);
         setErrors({});
@@ -69,14 +70,26 @@ export default function LoginPage() {
         </FormControl>
         <FormControl isRequired isInvalid={"email" in errors}>
           <FormLabel>Email</FormLabel>
-          <Input type="email" name="email" placeholder="email@example.com" />
+          <Input
+            type="email"
+            name="email"
+            placeholder="email@example.com"
+            data-cy="email"
+          />
           <FormErrorMessage>{errors.email}</FormErrorMessage>
         </FormControl>
 
         <FormControl isRequired isInvalid={"password" in errors}>
           <FormLabel>Password</FormLabel>
-          <Input type="password" name="password" placeholder="Password" />
-          <FormErrorMessage>{errors.password}</FormErrorMessage>
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            data-cy="password"
+          />
+          <FormErrorMessage data-cy="password_error">
+            {errors.password}
+          </FormErrorMessage>
         </FormControl>
         <FormControl display="flex" justifyContent="center">
           <Button type="submit" width="200px">

@@ -13,7 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { useAppContext } from "../context/app-context";
 import Stars from "../components/Stars";
-import { AllReviewsLoaderData, MAX_RATING } from "../api/reviews";
+import { AllReviewsLoaderData, MAX_RATING } from "../components/reviews";
+import { ApiError } from "../api/lib/api_client";
 
 /**
  * ReviewPage is the page that shows all the reviews for all the movies. It is a page that takes in no props.
@@ -21,12 +22,18 @@ import { AllReviewsLoaderData, MAX_RATING } from "../api/reviews";
  */
 export default function ReviewPage() {
   const data = useLoaderData() as AllReviewsLoaderData;
-  const { reviewMap, moviesSorted } = data;
+
   const [[user]] = useAppContext();
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!user) navigate("/login");
   }, [user, navigate]);
+
+  if (data instanceof ApiError) {
+    return <Heading>{data.message}</Heading>;
+  }
+  const { reviewMap, moviesSorted } = data;
 
   return (
     <Box
@@ -126,7 +133,7 @@ export default function ReviewPage() {
                   >
                     {reviews.reviews.map((review) => {
                       return (
-                        <ReviewCard key={review.review_id} review={review} />
+                        <ReviewCard key={review.user_id} review={review} />
                       );
                     })}
                   </Box>
@@ -165,7 +172,9 @@ function ReviewCard({ review }: { review: Review }) {
         </Box>
         <Divider />
         <Heading fontSize="xs" opacity={0.5} p="2">
-          {new Date(review.created_at).toLocaleDateString()}
+          {review.createdAt
+            ? new Date(review.createdAt).toLocaleDateString()
+            : ""}
         </Heading>
         {user && review.user_id === user.user_id && (
           <Button w="150px" as={Link} to={`/reviews/${review.movie_id}`}>

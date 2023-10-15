@@ -1,10 +1,10 @@
 import { ApiResponse } from "../../types";
-import { ApiFormError } from "./api_client";
+import { ApiError } from "./api_client";
 
-export default async function fetchWithSoftError<T>(
+export default async function fetchWithFormError<T>(
   url: RequestInfo | URL,
   options: RequestInit
-): Promise<T | ApiFormError<"message">> {
+): Promise<T | ApiError<"message">> {
   options.headers = {
     ...(options.headers || {}),
     "Content-Type": "application/json",
@@ -16,14 +16,22 @@ export default async function fetchWithSoftError<T>(
     const result = await response.json();
 
     if (result.error) {
-      return new ApiFormError("message", String(result.error));
+      return new ApiError("message", String(result.error));
     }
 
     const data = result as ApiResponse;
-    if (data.type === "user") {
-      return data.user as T;
+    switch (data.type) {
+      case "movies":
+        return data.movies as T;
+      case "reviews":
+        return data.reviews as T;
+      case "user":
+        return data.user as T;
+      case "success":
+        return data as T;
+      default:
+        return new ApiError("message", "Unknown response type");
     }
-    return data as T;
   }
   let err: string;
   try {
@@ -36,5 +44,5 @@ export default async function fetchWithSoftError<T>(
   } catch {
     err = `Error ${response.status}: ${response.statusText}`;
   }
-  return new ApiFormError("message", err);
+  return new ApiError("message", err);
 }

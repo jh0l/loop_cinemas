@@ -23,9 +23,10 @@ import {
 import { useFetcher, useLoaderData, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Movie, Review, ReviewMovieFormError } from "../types";
-import { ReturnData } from "../api/reviews";
+import { ReturnData } from "../components/reviews";
 import Stars from "../components/Stars";
 import { TrashIcon } from "@radix-ui/react-icons";
+import { ApiError } from "../api/lib/api_client";
 
 /**
  * MAX_RATING is the maximum rating a user can give a movie.
@@ -212,10 +213,12 @@ function ReviewMovieForm({ review }: { review: Review | undefined }) {
 /**
  * ReviewMovieLoaderData is the data that is passed to the ReviewMoviePage component through the react-router-dom 'loader' prop.
  */
-export interface ReviewMovieLoaderData {
-  movie: Movie | undefined;
-  review: Review[];
-}
+export type ReviewMovieLoaderData =
+  | {
+      movie: Movie | undefined;
+      review: Review[];
+    }
+  | ApiError<"message">;
 
 /**
  * ReviewMoviePage is the page that allows users to review a movie.
@@ -225,6 +228,8 @@ export default function ReviewMoviePage() {
   const data = useLoaderData() as ReviewMovieLoaderData;
   const [[user]] = useAppContext();
   if (!user) return <Heading size="md">You are not logged in.</Heading>;
+  if (data instanceof ApiError)
+    return <Heading size="md">{data.message}</Heading>;
   const { movie } = data;
   if (!movie) return <Heading size="md">Movie not found.</Heading>;
   const review = data.review.find((r) => r.user_id === user.user_id);

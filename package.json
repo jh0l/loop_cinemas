@@ -21,6 +21,7 @@
     "@types/react-dom": "^18.2.7",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
+    "cypress": "^13.3.1",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "framer-motion": "^6.5.1",
@@ -41,10 +42,12 @@
   },
   "scripts": {
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "testing-library/react sucks": "react-scripts test",
     "eject": "react-scripts eject",
     "start": "react-scripts start",
-    "dev": "nodemon --project=tsconfig.server.json -- server/index.ts "
+    "dev": "nodemon --project=tsconfig.server.json -- server/index.ts ",
+    "test": "cypress run --component",
+    "test:open": "cypress open --component"
   },
   "engines": {
     "node": ">=v18.16.0"

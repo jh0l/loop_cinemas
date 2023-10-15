@@ -14,7 +14,7 @@ import { Movie } from "../types";
 import { useAppContext } from "../context/app-context";
 import { Link as ChakraLink } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { MAX_RATING, MovieReviewData } from "../api/reviews";
+import { MAX_RATING, MovieReviewData } from "./reviews";
 import Stars from "./Stars";
 
 /**

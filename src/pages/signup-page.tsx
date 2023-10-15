@@ -17,8 +17,8 @@ import {
 } from "@chakra-ui/react";
 import { Link, useFetcher, useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/app-context";
-import { ReturnData } from "../api/signup";
 import { SignupFormError } from "../types";
+import { ReturnData } from "../api/signup";
 
 /**
  * SignupPage is the page where users can signup. It is a form that takes in a name, email, password, and confirm password. It will display an error message if the signup fails. It will display a success message if the signup succeeds.
@@ -26,12 +26,12 @@ import { SignupFormError } from "../types";
  */
 export default function SignupPage() {
   const navigate = useNavigate();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<ReturnData>();
   const [[user, setUser], [, setPopup]] = useAppContext();
   const [errors, setErrors] = useState<SignupFormError>({});
   useEffect(() => {
     if (fetcher.data) {
-      const res = JSON.parse(fetcher.data) as ReturnData;
+      const res = fetcher.data;
       if ("success" in res) {
         setUser(res.success.user);
         setErrors({});
@@ -74,13 +74,23 @@ export default function SignupPage() {
         </FormControl>
         <FormControl isRequired isInvalid={"name" in errors}>
           <FormLabel>Name</FormLabel>
-          <Input type="text" name="name" placeholder="Alex Smith" />
+          <Input
+            type="text"
+            name="name"
+            placeholder="Alex Smith"
+            data-cy="name"
+          />
           <FormHelperText>{"This is what we'll know you by."}</FormHelperText>
           <FormErrorMessage>{errors.name}</FormErrorMessage>
         </FormControl>
         <FormControl isRequired isInvalid={"email" in errors}>
           <FormLabel>Email</FormLabel>
-          <Input type="email" name="email" placeholder="email@example.com" />
+          <Input
+            type="email"
+            name="email"
+            placeholder="email@example.com"
+            data-cy="email"
+          />
           <FormHelperText>
             {"We'll never share your email with anyone."}
           </FormHelperText>
@@ -88,13 +98,20 @@ export default function SignupPage() {
         </FormControl>
         <FormControl isRequired isInvalid={"password" in errors}>
           <FormLabel>Password</FormLabel>
-          <Input type="password" name="password" placeholder="Password" />
+          <Input
+            type="password"
+            name="password"
+            placeholder="Password"
+            data-cy="password"
+          />
           <FormHelperText>
             {
               "Must be at least 14 characters long, contain at least one uppercase letter, one lowercase letter, and one number."
             }
           </FormHelperText>
-          <FormErrorMessage>{errors.password}</FormErrorMessage>
+          <div data-cy="password_error">
+            <FormErrorMessage>{errors.password}</FormErrorMessage>
+          </div>
         </FormControl>
         <FormControl isRequired isInvalid={"confirm_password" in errors}>
           <FormLabel>Confirm Password</FormLabel>
@@ -102,12 +119,13 @@ export default function SignupPage() {
             type="password"
             name="confirm_password"
             placeholder="Confirm Password"
+            data-cy="confirm_password"
           />
           <FormHelperText>{"Please confirm your password."}</FormHelperText>
           <FormErrorMessage>{errors.confirm_password}</FormErrorMessage>
         </FormControl>
         <FormControl display="flex" justifyContent="center">
-          <Button type="submit" width="200px">
+          <Button type="submit" width="200px" data-cy="submit">
             Submit
           </Button>
         </FormControl>

@@ -1,24 +1,25 @@
 import {
   FormError,
   User,
-  SignupFormError,
   LoginFormFieldName,
   EditProfileFormFieldName,
   Movie,
   Review,
   InsertUser,
+  SignupFormFieldName,
 } from "../../types";
 import { MOVIES } from "./fakeData";
-import fetchWithSoftError from "./fetchWithError";
+import fetchWithFormError from "./fetchWithFormError";
 
 /**
- * A class to help with form validation
+ * A class to help with api error handling and form validation
  * @template T The field names
  */
-export class ApiFormError<T extends string | "message"> {
+export class ApiError<T extends string | "message"> extends Error {
   field: T;
   message: string;
   constructor(field: T, message: string) {
+    super(message);
     this.field = field;
     this.message = message;
   }
@@ -65,24 +66,26 @@ class ApiClient {
   }
 
   /**
-   *
    * @param user the user to signup
    * @returns a Promise that resolves to the user if successful or a SignupFormError if not
    */
-  async user_signup(user: InsertUser): Promise<User | SignupFormError> {
-    const res = await fetchWithSoftError<User>("/api/user/signup", {
+  async user_signup(
+    user: InsertUser
+  ): Promise<User | ApiError<SignupFormFieldName>> {
+    return await fetchWithFormError<User>("/api/user/signup", {
       method: "POST",
       body: JSON.stringify(user),
     });
-    if (res instanceof ApiFormError) {
-      return res;
-    }
-    return res;
   }
 
   /**
-   *
+   * @returns a Promise that resolves to the user if successful or a SignupFormError if not
    */
+  async user_get(): Promise<User | null | ApiError<"message">> {
+    return await fetchWithFormError<User>("/api/user", {
+      method: "GET",
+    });
+  }
 
   /**
    * updates a user in the database
@@ -91,16 +94,12 @@ class ApiClient {
    * @returns the updated user if successful or a EditProfileFormError if not
    */
   async updateUser(
-    user_id: string,
     user: Partial<User>
-  ): Promise<User | ApiFormError<EditProfileFormFieldName>> {
-    const idx = this.users.findIndex((u) => u.user_id === user_id);
-    if (idx < 0) {
-      return new ApiFormError("email", "User does not exist");
-    }
-    this.users[idx] = { ...this.users[idx], ...user };
-    localStorage.setItem(USERS_KEY, JSON.stringify(this.users));
-    return this.users[idx];
+  ): Promise<User | ApiError<EditProfileFormFieldName>> {
+    return fetchWithFormError<User>(`/api/user/`, {
+      method: "PATCH",
+      body: JSON.stringify({ ...user }),
+    });
   }
 
   /**
@@ -112,12 +111,20 @@ class ApiClient {
   async user_login(
     email: string,
     password: string
-  ): Promise<User | ApiFormError<LoginFormFieldName>> {
-    const user = this.users.find((u) => u.email === email);
-    if (!user || user.password !== password) {
-      return new ApiFormError("message", "User/Password combination incorrect");
-    }
-    return user;
+  ): Promise<User | ApiError<LoginFormFieldName>> {
+    return await fetchWithFormError<User>("/api/user/signin", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  }
+
+  /**
+   * sign out user and remove cookies
+   */
+  async user_logout(): Promise<User | ApiError<"message">> {
+    return await fetchWithFormError<User>("/api/user/signout", {
+      method: "GET",
+    });
   }
 
   /**
@@ -127,23 +134,21 @@ class ApiClient {
    */
   async deleteUser(
     user_id: string
-  ): Promise<User | ApiFormError<EditProfileFormFieldName>> {
-    const idx = this.users.findIndex((u) => u.user_id === user_id);
-    if (idx < 0) {
-      return new ApiFormError("email", "User does not exist");
-    }
-    const user = this.users[idx];
-    this.users.splice(idx, 1);
-    localStorage.setItem(USERS_KEY, JSON.stringify(this.users));
-    return user;
+  ): Promise<User | ApiError<EditProfileFormFieldName>> {
+    return await fetchWithFormError<User>(`/api/user`, {
+      method: "DELETE",
+      body: JSON.stringify({ user_id }),
+    });
   }
 
   /**
    * gets all movies from the database
    * @returns a Promise that resolves to an array of movies
    */
-  async getMovies(): Promise<Movie[]> {
-    return this.movies;
+  async getMovies(): Promise<Movie[] | ApiError<"message">> {
+    return await fetchWithFormError<Movie[]>(`/api/movies`, {
+      method: "GET",
+    });
   }
 
   /**
@@ -151,11 +156,11 @@ class ApiClient {
    * @param user_id (optional) the user id of the user to get reviews for
    * @returns a Promise that resolves to an array of reviews
    */
-  async getReviews(user_id?: string): Promise<Review[]> {
-    if (user_id) {
-      return this.reviews.filter((r) => r.user_id === user_id);
-    }
-    return this.reviews;
+  async getReviews(user_id?: string): Promise<Review[] | ApiError<"message">> {
+    const query = user_id ? `?user_id=${user_id}` : "";
+    return await fetchWithFormError<Review[]>(`/api/reviews${query}`, {
+      method: "GET",
+    });
   }
 
   /**
@@ -187,7 +192,7 @@ class ApiClient {
       (r) => r.movie_id === movie_id && r.user_id === user_id
     );
     if (idx < 0) {
-      return new ApiFormError("message", "Review does not exist");
+      return new ApiError("message", "Review does not exist");
     }
     const review = this.reviews[idx];
     this.reviews.splice(idx, 1);

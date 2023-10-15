@@ -21,10 +21,12 @@ import {
   ModalOverlay,
   Text,
 } from "@chakra-ui/react";
-import { useFetcher } from "react-router-dom";
+import { useFetcher, useLoaderData } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { EditProfileFormError } from "../types";
-import { ReturnData } from "../api/profile";
+import { ProfileLoaderData, ReturnData } from "../api/profile";
+import { useRevalidator } from "react-router-dom";
+import { ApiError } from "../api/lib/api_client";
 
 /**
  * EditProfileForm is the form that allows users to edit their profile. It is a form that takes in a onClose function for when the form is closed.
@@ -32,14 +34,17 @@ import { ReturnData } from "../api/profile";
  * @returns {JSX.Element} component
  */
 function EditProfileForm({ onClose }: { onClose: () => void }) {
+  const data = useLoaderData() as ProfileLoaderData;
+  const revalidator = useRevalidator();
   const fetcher = useFetcher();
-  const [[user, setUser], [, setPopup]] = useAppContext();
+  const [[, setUser], [, setPopup]] = useAppContext();
   const [errors, setErrors] = useState<EditProfileFormError>({});
   useEffect(() => {
     if (fetcher.data) {
       const res = JSON.parse(fetcher.data) as ReturnData;
       if ("success" in res) {
         setUser(res.success.user);
+        revalidator.revalidate();
         setErrors({});
         setPopup({
           title: "Success",
@@ -53,8 +58,15 @@ function EditProfileForm({ onClose }: { onClose: () => void }) {
         setErrors({ message: res.error.message });
       }
     }
-  }, [fetcher, setUser, setPopup, onClose]);
-  if (!user) return null;
+  }, [fetcher, setUser, setPopup, onClose, revalidator]);
+  if (!data) return null;
+  if (data instanceof ApiError) {
+    return (
+      <Heading size="md">
+        {data.field}: {data.message}
+      </Heading>
+    );
+  }
   return (
     <Card>
       <CardHeader>
@@ -77,9 +89,9 @@ function EditProfileForm({ onClose }: { onClose: () => void }) {
             </FormControl>
           )}
           <FormControl isInvalid={"name" in errors}>
-            <input value={user.user_id} type="hidden" name="user_id" />
+            <input value={data.user_id} type="hidden" name="user_id" />
             <FormLabel>Name</FormLabel>
-            <Input type="text" name="name" defaultValue={user.name} />
+            <Input type="text" name="name" defaultValue={data.name} />
             <FormHelperText>
               {"Change what everyone will call you by."}
             </FormHelperText>
@@ -87,7 +99,7 @@ function EditProfileForm({ onClose }: { onClose: () => void }) {
           </FormControl>
           <FormControl isInvalid={"email" in errors}>
             <FormLabel>Email</FormLabel>
-            <Input type="email" name="email" defaultValue={user.email} />
+            <Input type="email" name="email" defaultValue={data.email} />
             <FormHelperText>
               {"this will be required to log in."}
             </FormHelperText>
@@ -172,10 +184,16 @@ function DeleteProfileForm({ onClose }: { onClose: () => void }) {
  * @returns {JSX.Element} component
  */
 export default function ProfilePage() {
-  const [[user]] = useAppContext();
+  const data = useLoaderData() as ProfileLoaderData;
   const [editMode, setEditMode] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false);
-  if (!user) return <Heading size="md">You are not logged in.</Heading>;
+  if (!data) return <Heading size="md">You are not logged in.</Heading>;
+  if (data instanceof ApiError)
+    return (
+      <Heading size="md">
+        {data.field}: {data.message}
+      </Heading>
+    );
   return (
     <Flex
       justifyContent="center"
@@ -193,11 +211,10 @@ export default function ProfilePage() {
           <Heading size="md">Profile</Heading>
           <Flex gap="4">
             <Flex flex="1" gap="4" alignItems="center" flexWrap="wrap">
-              <Avatar name={user.name} />
-
+              <Avatar name={data.name} />
               <Box>
-                <Heading size="sm">{user.name}</Heading>
-                <Text>{user.email}</Text>
+                <Heading size="sm">{data.name}</Heading>
+                <Text>{data.email}</Text>
               </Box>
             </Flex>
             <IconButton
@@ -219,7 +236,7 @@ export default function ProfilePage() {
         <CardBody>
           <Divider mb="5" />
           <Text>
-            Joined: <b>{new Date(user.createdAt).toDateString()}</b>
+            Joined: <b>{new Date(data.createdAt).toDateString()}</b>
           </Text>
         </CardBody>
       </Card>

@@ -8,7 +8,8 @@ import {
 } from "@chakra-ui/react";
 import { useLoaderData } from "react-router-dom";
 import MoviePoster from "../components/MoviePoster";
-import { AllReviewsLoaderData } from "../api/reviews";
+import { AllReviewsLoaderData } from "../components/reviews";
+import { ApiError } from "../api/lib/api_client";
 
 /**
  * Home page, shows all movies and brief information about Loop Cinemas
@@ -16,6 +17,9 @@ import { AllReviewsLoaderData } from "../api/reviews";
  */
 export default function HomePage() {
   const data = useLoaderData() as AllReviewsLoaderData;
+  if (data instanceof ApiError) {
+    return <Heading>{data.message}</Heading>;
+  }
   const { reviewMap, moviesSorted } = data;
   return (
     <Box

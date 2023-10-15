@@ -6,21 +6,12 @@ import {
   FormReturnData,
   FormValidation,
 } from "../types";
-import Api, { ApiFormError } from "./lib/api_client";
+import Api, { ApiError } from "./lib/api_client";
 
 /**
  * the return type of the signup endpoint
  */
 export type ReturnData = FormReturnData<{ user: User }, SignupFormError>;
-
-/**
- * creates a response object
- * @param data the return type from above
- * @param status the status code of the http response
- * @returns a Response object
- */
-const response = (data: ReturnData, status: number): Response =>
-  new Response(JSON.stringify(data), { status });
 
 /**
  * the signup endpoint
@@ -34,7 +25,7 @@ const response = (data: ReturnData, status: number): Response =>
  */
 export default async function signup({
   request,
-}: ActionFunctionArgs): Promise<Response> {
+}: ActionFunctionArgs): Promise<ReturnData> {
   const validation = new FormValidation<SignupFormFieldName>();
   const { setInvalid } = validation;
   const data = await request.formData();
@@ -66,45 +57,34 @@ export default async function signup({
     }
   }
   if (validation.length() > 0) {
-    return response(
-      {
-        error: {
-          form: validation.json(),
-        },
+    return {
+      error: {
+        form: validation.json(),
       },
-      400
-    );
+    };
   }
 
   // malformed request
   if (!name || !email || !password)
-    return response(
-      {
-        error: {
-          message: "Malformed request",
-        },
+    return {
+      error: {
+        message: "Malformed request",
       },
-      400
-    );
+    };
   const newUser = {
     name: name.toString(),
     email: email.toString(),
     password: password.toString(),
   };
   const res = await Api.user_signup(newUser);
-  if (res instanceof ApiFormError) {
-    return response(
-      {
-        error: {
-          form: res.json(),
-        },
+  if (res instanceof ApiError) {
+    return {
+      error: {
+        form: res.json(),
       },
-      400
-    );
+    };
   }
-  return new Response(JSON.stringify({ success: { user: res } }), {
-    status: 200,
-  });
+  return { success: { user: res } };
 }
 
 /**

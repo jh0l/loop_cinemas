@@ -1,6 +1,6 @@
 import { ActionFunctionArgs } from "react-router-dom";
 import { User, EditProfileFormError, FormReturnData } from "../types";
-import Api, { ApiFormError } from "./lib/api_client";
+import Api, { ApiError } from "./lib/api_client";
 import { validateEmail } from "./signup";
 
 /**
@@ -39,7 +39,7 @@ export default async function profile({
       return response({ error: { form: { email: "user ID required" } } }, 400);
     }
     const user = await Api.deleteUser(user_id.toString());
-    if (user instanceof ApiFormError) {
+    if (user instanceof ApiError) {
       return response({ error: { form: user.json() } }, 400);
     }
     return response({ success: { user: false } }, 200);
@@ -54,12 +54,17 @@ export default async function profile({
   } else if (!validateEmail(email.toString())) {
     return response({ error: { form: { email: "email is invalid" } } }, 400);
   }
-  const res = await Api.updateUser(user_id.toString(), {
+  const res = await Api.updateUser({
     name: name.toString(),
     email: email.toString(),
   });
-  if (res instanceof ApiFormError) {
+  if (res instanceof ApiError) {
     return response({ error: { form: res.json() } }, 400);
   }
   return response({ success: { user: res } }, 200);
+}
+
+export type ProfileLoaderData = User | ApiError<"message"> | null;
+export function profileLoader(): Promise<ProfileLoaderData> {
+  return Api.user_get();
 }

@@ -1,5 +1,5 @@
 import { ActionFunctionArgs } from "react-router-dom";
-import Api from "./lib/api_client";
+import Api, { ApiError } from "../api/lib/api_client";
 import {
   FormReturnData,
   FormValidation,
@@ -127,10 +127,13 @@ async function POST(args: ActionFunctionArgs) {
 
   // PREVENT FAKE REVIEWS
   const reviews = await Api.getReviews(user_id);
+  if (reviews instanceof ApiError) {
+    return response({ error: { message: reviews.message } }, 400);
+  }
   // if last review was less than 3 hours ago, return an error
   if (reviews.length > 0) {
     const lastReview = reviews[reviews.length - 1];
-    const lastReviewDate = new Date(lastReview.created_at);
+    const lastReviewDate = new Date(lastReview.createdAt || new Date());
     const now = new Date();
     const diff = now.getTime() - lastReviewDate.getTime();
     const hours = diff / (1000 * 60 * 60);
@@ -169,12 +172,10 @@ async function POST(args: ActionFunctionArgs) {
   }
   const ratingN = Number(rating.toString()) / 10;
   const review: Review = {
-    review_id: Math.random().toString(),
     movie_id: movie_id.toString(),
     user_id: user_id.toString(),
     rating: ratingN,
     content: content.toString(),
-    created_at: new Date().toISOString(),
   };
 
   await Api.addReview(review);
@@ -211,13 +212,12 @@ export class MovieReviewData {
  */
 export const MAX_RATING = 5;
 
-/**
- * return type of the allReviewsLoader function
- */
-export interface AllReviewsLoaderData {
-  moviesSorted: Movie[];
-  reviewMap: Map<string, MovieReviewData>;
-}
+export type AllReviewsLoaderData =
+  | {
+      moviesSorted: Movie[];
+      reviewMap: Map<string, MovieReviewData>;
+    }
+  | ApiError<"message">;
 
 /**
  * loads all reviews and movies from the database, then sorts the movies by average rating
@@ -226,7 +226,13 @@ export interface AllReviewsLoaderData {
  */
 export async function allReviewsLoader(): Promise<AllReviewsLoaderData> {
   const reviews = await Api.getReviews();
+  if (reviews instanceof ApiError) {
+    return reviews;
+  }
   const movies = await Api.getMovies();
+  if (movies instanceof ApiError) {
+    return movies;
+  }
   const reviewMap = new Map<string, MovieReviewData>();
   reviews.forEach((review) => {
     let movieData = reviewMap.get(review.movie_id);
@@ -261,11 +267,16 @@ export async function allReviewsLoader(): Promise<AllReviewsLoaderData> {
 export async function reviewsLoader({
   params,
 }: any): Promise<ReviewMovieLoaderData> {
-  if (!("movieId" in params)) return { movie: undefined, review: [] };
+  if (!("movieId" in params)) return new ApiError("message", "Not found");
   const movies = await Api.getMovies();
+  if (movies instanceof ApiError) {
+    return movies;
+  }
   const movie = movies.find((m) => m.movie_id === params.movieId);
-  const review = (await Api.getReviews()).filter(
-    (r) => r.movie_id === params.movieId
-  );
+  const reviews = await Api.getReviews();
+  if (reviews instanceof ApiError) {
+    return reviews;
+  }
+  const review = reviews.filter((r) => r.movie_id === params.movieId);
   return { movie, review };
 }

@@ -11,13 +11,13 @@ import LoginPage from "./pages/login-page";
 import signup from "./api/signup";
 import login from "./api/login";
 import ProfilePage from "./pages/profile-page";
-import profile from "./api/profile";
+import profile, { profileLoader } from "./api/profile";
 import "@fontsource/poppins";
 import ReviewPage from "./pages/review-page";
 import reviews, {
   allReviewsLoader as allReviewsMoviesLoader,
   reviewsLoader,
-} from "./api/reviews";
+} from "./components/reviews";
 import ReviewMoviePage from "./pages/review-movie-page";
 
 /**
@@ -40,7 +40,7 @@ const theme = {
 /**
  * Router for the app. Some routes have loaders for data loading. Some routes have actions for form submissions.
  */
-const router = createBrowserRouter([
+export const routes = [
   {
     path: "",
     element: <RootPage />,
@@ -72,6 +72,7 @@ const router = createBrowserRouter([
         path: "/profile",
         element: <ProfilePage />,
         errorElement: <ErrorPage />,
+        loader: profileLoader,
         action: profile,
       },
       {
@@ -94,7 +95,9 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
+
+const router = createBrowserRouter(routes);
 
 /**
  * Combines the theme with the Chakra default theme.

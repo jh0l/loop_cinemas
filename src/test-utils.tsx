@@ -1,12 +1,20 @@
-import * as React from "react"
-import { render, RenderOptions } from "@testing-library/react"
-import { ChakraProvider, theme } from "@chakra-ui/react"
+import { RouterProvider, createMemoryRouter } from "react-router-dom";
 
-const AllProviders = ({ children }: { children?: React.ReactNode }) => (
-  <ChakraProvider theme={theme}>{children}</ChakraProvider>
-)
+import { routes } from "./App";
+import AppContext from "./context/app-context";
+import { ChakraProvider } from "@chakra-ui/react";
 
-const customRender = (ui: React.ReactElement, options?: RenderOptions) =>
-  render(ui, { wrapper: AllProviders, ...options })
+export default function renderWithRouter(path: string) {
+  const router = createMemoryRouter(routes, {
+    initialEntries: [path],
+    initialIndex: 1,
+  });
 
-export { customRender as render }
+  return (
+    <AppContext>
+      <ChakraProvider>
+        <RouterProvider router={router} />
+      </ChakraProvider>
+    </AppContext>
+  );
+}
